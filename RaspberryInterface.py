@@ -15,7 +15,7 @@ Counter=0
 while True:
     if Counter == 10:
         Counter = 0
-        ser.write(b"TPINT!\n")
+        ser.write(b"TPINT\n")
         line = ser.readline().decode('utf-8').rstrip()
         print(line)
 
