@@ -30,6 +30,8 @@ const int kSerialBaudrate = 9600;               // baud rate
 const int kCycleTime = 100;                     // cycle time of the arduino loop
 const int kServomotorOpened = 0;                // Angle which servo opens window completely
 const int kServomotorClosed = 88;               // Angle which servo closes window completely
+const int kServomotorResolution = 1;            // Angle (degrees) to increment servo position
+const int kServomotorDelay = 10;                // time (ms) to wait for servo to reach position
 const uint32_t kFanLowSpeed = 50;               // Duty cycle of fan at low speed
 const uint32_t kFanHighSpeed = 200;             // Duty cycle of fan at high speed
 const int pumpTimeThreshold = 2000;             // time (ms) water pump is activated
@@ -378,38 +380,41 @@ int readSoil (int Pin, int PinVcc)
 // ****************************   Window control function
 void window (int resultcmd)
 {
-  if (resultcmd == 1) // opening request
-  { 
-    int delayTime= (abs(servomotor.read()-kServomotorOpened))*15;
-    servomotor.attach(SERVOPIN);
-    servomotor.write(kServomotorOpened);
-    delay(delayTime);
-    servomotor.detach();
-  }
-  else if (resultcmd == 0) // closing request
-  { 
-    int delayTime= (abs(servomotor.read()-kServomotorClosed))*15;
-    servomotor.attach(SERVOPIN);
-    servomotor.write(kServomotorClosed);
-    delay(delayTime);
-    servomotor.detach();
-  }
-  else if (resultcmd == 2) // force close reset
+  switch (resultcmd) 
   {
-    servomotor.attach(SERVOPIN);
-    servomotor.write(kServomotorClosed);
-    delay(5000);
-    servomotor.detach();
-    delay(3000);
-  }
-
-  else if (resultcmd == 3) // force open reset
-  {
-    servomotor.attach(SERVOPIN);
-    servomotor.write(kServomotorOpened);
-    delay(2000);
-    servomotor.detach();
-    delay(3000);
+    case 0: // closing request
+      servomotor.attach(SERVOPIN);
+      for (int pos = servomotor.read(); pos <= kServomotorClosed; pos += kServomotorResolution)
+      {
+        servomotor.write(pos);              
+        delay(kServomotorDelay);                      
+      }
+      servomotor.detach();
+      break;
+    case 1: // opening request
+      servomotor.attach(SERVOPIN);
+      for (int pos = servomotor.read(); pos >= kServomotorOpened; pos -= kServomotorResolution)
+      {
+        servomotor.write(pos);             
+        delay(kServomotorDelay);                      
+      }
+      servomotor.detach();
+      break;
+    case 2: // force close reset
+      servomotor.attach(SERVOPIN);
+      servomotor.write(kServomotorClosed);
+      delay(kServomotorDelay*180);        // max time for servo to reach any position
+      servomotor.detach();
+      delay(3000);                        // generic delay time to allow physical check
+      break;
+    case 3: // force open reset
+      servomotor.attach(SERVOPIN);
+      servomotor.write(kServomotorOpened);
+      delay(kServomotorDelay*180);        // max time for servo to reach any position
+      servomotor.detach();
+      delay(3000);                        // generic delay time to allow physical check
+      break;
+    default: break;
   }
 }
 
