@@ -22,7 +22,7 @@ void command (int, bool);
 void pwm_command (int, bool);
 double Thermister(int);
 int readSoil(int, int);
-void window (bool);
+void window (int);
 void pump (bool);
 
 // Constant variables
@@ -32,10 +32,10 @@ const int kServomotorOpened = 0;                // Angle which servo opens windo
 const int kServomotorClosed = 88;               // Angle which servo closes window completely
 const uint32_t kFanLowSpeed = 50;               // Duty cycle of fan at low speed
 const uint32_t kFanHighSpeed = 200;             // Duty cycle of fan at high speed
-const int pumpTimeThreshold = 5000;             // time (ms) water pump is activated
+const int pumpTimeThreshold = 2000;             // time (ms) water pump is activated
 const int kSensorPolling = 10000;               // Time (ms) between sensor polls
 const uint32_t kSensorSlowPolling = 600000;     // Time (ms) between slow sensor polls
-const uint32_t kSensorBiDailyPolling = 43200000;// Time (ms) between bi-daily sensor polls
+const uint32_t kSensorDailyPolling = 86400000;  // Time (ms) between daily sensor polls
 
 
 // Global objects
@@ -47,11 +47,7 @@ SandTimer soilMoistureTimer;       // Create a slow-polling Timer for the soil s
 SandTimer pumpTimer;               // Create a daily Timer for the pump solenoid
 
 // Initialize variables
-bool booleanCoolingOn = false;
 bool debugMode = false;
-
-unsigned long startTime = 0; // start time of loop in millis
-unsigned long nowTime = 0; // current time of loop in millis
 
 char serialChar = 0; // reading the serial port
 String query = ""; // save the command from the serial port
@@ -76,7 +72,7 @@ int temperature_state = 0; // switch mode from cooling to heating
 bool pumpState = 0; // pump
 bool fanState = 0; // fan
 bool lampState = 0; // lamp
-bool servoState = 0; // servomotor
+int servoState = 0; // servomotor
 
 void setup () 
 {  
@@ -89,9 +85,9 @@ void setup ()
   dhtInterior.begin(); // Start Interior DHT sensor object
   dhtExterior.begin(); // Start Exterior DHT sensor object
 
-  sensorTimer.start(kSensorPolling);       // Poll general input sensors every 10 seconds
+  sensorTimer.start(kSensorPolling);           // Poll general input sensors every 10 seconds
   soilMoistureTimer.start(kSensorSlowPolling); // Poll soil Moisture sensor every 10 min
-  pumpTimer.start(kSensorBiDailyPolling);  // Poll the pump solenoid state every 12 hours
+  pumpTimer.start(kSensorDailyPolling);        // Poll the pump solenoid state every 24 hours
   
   // Initialize the digital inputs/outputs
   pinMode(SOILPINVCC, OUTPUT);    // Pin to control the Soil Moisture VCC
@@ -198,12 +194,12 @@ void loop ()
     }
     else if (query == "WINON")
     {
-      window(1); 
+      window(3); 
       query = "";
     }
     else if (query == "WINOF")
     {
-      window(0);
+      window(2);
       query = "";
     }
     else if (query == "WINRD")
@@ -380,7 +376,7 @@ int readSoil (int Pin, int PinVcc)
 }
 
 // ****************************   Window control function
-void window (bool resultcmd)
+void window (int resultcmd)
 {
   if (resultcmd == 1) // opening request
   { 
@@ -397,6 +393,23 @@ void window (bool resultcmd)
     servomotor.write(kServomotorClosed);
     delay(delayTime);
     servomotor.detach();
+  }
+  else if (resultcmd == 2) // force close reset
+  {
+    servomotor.attach(SERVOPIN);
+    servomotor.write(kServomotorClosed);
+    delay(5000);
+    servomotor.detach();
+    delay(3000);
+  }
+
+  else if (resultcmd == 3) // force open reset
+  {
+    servomotor.attach(SERVOPIN);
+    servomotor.write(kServomotorOpened);
+    delay(2000);
+    servomotor.detach();
+    delay(3000);
   }
 }
 
