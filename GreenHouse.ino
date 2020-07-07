@@ -18,7 +18,8 @@
 #define DHTINTVCC 12      // Digital pin 12 connected to the 5V pin of Interior DHT Sensor 
 
 // Function declarations
-void readSensors(bool);   // Read sensor with print to Serial set to false
+void readSensors();       // Poll sensors and print to Serial port
+void pollSensors(bool);   // Read sensors with option to push data to Serial Plotter
 void command (int, bool);
 void pwm_command (int, bool);
 double Thermister(int);
@@ -117,7 +118,7 @@ void setup ()
 void loop () 
 {
 
-  readSensors(debugMode);
+  pollSensors(debugMode);
 
   // ************************************************ ******** Series reading part
   if (Serial.available() > 0)
@@ -213,6 +214,11 @@ void loop ()
       Serial.println (servomotor.read()); 
       query = "";
     }
+    else if (query == "GETALL")
+    {
+      readSensors();
+      query = "";
+    }
     else
     {
     if (Serial.available () == 0)
@@ -280,7 +286,7 @@ void loop ()
 
 // ************************************************ ******** Functions ***************************************** ********************
 
-void readSensors(bool debugPrintMode)
+void pollSensors(bool debugPrintMode)
 {
   if (sensorTimer.finished())
   {
@@ -303,21 +309,23 @@ void readSensors(bool debugPrintMode)
       Serial.print(temp_ext);
       Serial.print(" ");
       Serial.println((temperature_setpoint-temperature_delta) + (lampState*temperature_delta));
-    } else {
-      jsonDoc["fan"] = fanState;
-      jsonDoc["humidity_external"] = humidity_ext;
-      jsonDoc["humidity_internal"] = humidity_int;
-      jsonDoc["lamp"] = lampState;
-      jsonDoc["luminosity"] = luminosity;
-      jsonDoc["moisture"] = soil_moisture;
-      jsonDoc["servo"] = servoState;
-      jsonDoc["temperature_external"] = temp_ext;
-      jsonDoc["temperature_internal"] = temp_int;
-      serializeJson(jsonDoc, Serial); // Write the JSON object straight to the Serial port
     }
-    
     sensorTimer.startOver();
   }
+}
+
+void readSensors()
+{
+  jsonDoc["fan"] = fanState;
+  jsonDoc["humidity_external"] = humidity_ext;
+  jsonDoc["humidity_internal"] = humidity_int;
+  jsonDoc["lamp"] = lampState;
+  jsonDoc["luminosity"] = luminosity;
+  jsonDoc["moisture"] = soil_moisture;
+  jsonDoc["servo"] = servoState;
+  jsonDoc["temperature_external"] = temp_ext;
+  jsonDoc["temperature_internal"] = temp_int;
+  serializeJson(jsonDoc, Serial); // Write the JSON object straight to the Serial port
 }
 
 // **************************** function of the output control
