@@ -35,7 +35,6 @@ def post_request(payload):
             your token credentials and internet connection")
         return False
 
-    print("[INFO] request made properly, your device is updated")
     return True
 
 
@@ -43,9 +42,9 @@ def post_request(payload):
 while True:
     if Counter == 10:
         Counter = 0
-        payload = json.loads('ser.readline().decode('utf-8').rstrip()')
+        payload = ser.readline().decode('utf-8').rstrip()
         print(payload)
-        post_request(payload)
+        post_request(json.loads(payload))
 
     Counter = Counter +1
     time.sleep(1)
