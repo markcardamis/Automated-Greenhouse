@@ -70,7 +70,7 @@ int humidity_limit_high = 60; // high humidity limit
 String humitidy_temp_var; // temporary variable for humidity
 
 // temperature regulation
-int temperature_setpoint = 23; // average temperature setpoint
+int temperature_setpoint = 25; // average temperature setpoint
 int temperature_delta = 5; // from T% to the setpoint
 int temperature_state = 0; // switch mode from cooling to heating
 
