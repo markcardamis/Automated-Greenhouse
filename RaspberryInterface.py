@@ -42,6 +42,7 @@ def post_request(payload):
 while True:
     if Counter == 10:
         Counter = 0
+        ser.write(b"GETALL")
         payload = ser.readline().decode('utf-8').rstrip()
         print(payload)
         post_request(json.loads(payload))
