@@ -1,5 +1,6 @@
 #include <DHT.h>
 #include <Servo.h>
+#include <ArduinoJson.h>
 #include <SandTimer.h>
 
 #define TEMPINTPIN 0      // Analog pin 0 connected to the Temperature Sensor Interior
@@ -38,15 +39,18 @@ const int pumpTimeThreshold = 2000;             // time (ms) water pump is activ
 const int kSensorPolling = 10000;               // Time (ms) between sensor polls
 const uint32_t kSensorSlowPolling = 600000;     // Time (ms) between slow sensor polls
 const uint32_t kSensorDailyPolling = 86400000;  // Time (ms) between daily sensor polls
+const size_t kJsonSize = JSON_OBJECT_SIZE(9);   // Set number of tracked sensors for JSON model
+      
 
 
 // Global objects
-Servo servomotor;                  // create servo object to control a servo
-DHT dhtInterior(DHTINTPIN, DHT22); // Create an Interior DHT sensor object
-DHT dhtExterior(DHTEXTPIN, DHT11); // Create an Exterior DHT sensor object
-SandTimer sensorTimer;             // Create a general Timer to limit sensor polling
-SandTimer soilMoistureTimer;       // Create a slow-polling Timer for the soil sensor
-SandTimer pumpTimer;               // Create a daily Timer for the pump solenoid
+Servo servomotor;                       // create servo object to control a servo
+DHT dhtInterior(DHTINTPIN, DHT22);      // Create an Interior DHT sensor object
+DHT dhtExterior(DHTEXTPIN, DHT11);      // Create an Exterior DHT sensor object
+SandTimer sensorTimer;                  // Create a general Timer to limit sensor polling
+SandTimer soilMoistureTimer;            // Create a slow-polling Timer for the soil sensor
+SandTimer pumpTimer;                    // Create a daily Timer for the pump solenoid
+DynamicJsonDocument jsonDoc(kJsonSize); // Create a JSON object to send sensor data
 
 // Initialize variables
 bool debugMode = false;
@@ -269,7 +273,7 @@ void loop ()
 
   pump (pumpState);
 
-  // ************************************************ ******** cycle time
+  // ***************************************m********* ******** cycle time
   delay (kCycleTime);
 
 }
@@ -294,29 +298,22 @@ void readSensors(bool debugPrintMode)
     
     if (debugPrintMode)
     {
-      Serial.print(F("Temperature Analog Exterior: "));
-      Serial.print(temp_ext);
-      Serial.println(F("°C ")); 
-      Serial.print(F("Moisture Analog Scale: "));
-      Serial.println(soil_moisture);
-      Serial.print(F("Luminosity Analog Interior: "));
-      Serial.print(luminosity);
-      Serial.println(F("%"));
-      Serial.print(F("Temperature Digital Interior: "));
-      Serial.print(temp_int);
-      Serial.println(F("°C "));
-      Serial.print(F("Humidity Digital Interior: "));
-      Serial.print(humidity_int);
-      Serial.println(F("%"));
-      Serial.print(F("Humidity Digital Exterior: "));
-      Serial.print(humidity_ext);
-      Serial.println(F("%"));
-    } else {
       Serial.print(temp_int);
       Serial.print(" ");
       Serial.print(temp_ext);
       Serial.print(" ");
       Serial.println((temperature_setpoint-temperature_delta) + (lampState*temperature_delta));
+    } else {
+      jsonDoc["fan"] = fanState;
+      jsonDoc["humidity_external"] = humidity_ext;
+      jsonDoc["humidity_internal"] = humidity_int;
+      jsonDoc["lamp"] = lampState;
+      jsonDoc["luminosity"] = luminosity;
+      jsonDoc["moisture"] = soil_moisture;
+      jsonDoc["servo"] = servoState;
+      jsonDoc["temperature_external"] = temp_ext;
+      jsonDoc["temperature_internal"] = temp_int;
+      serializeJson(jsonDoc, Serial); // Write the JSON object straight to the Serial port
     }
     
     sensorTimer.startOver();
