@@ -5,6 +5,7 @@ import os       #Library to get env variables
 import serial   #Library for serial communication
 import time     #Library for the delay
 import requests #Library for HTTP requests
+import json     #Library for creating JSON object
 
 TOKEN = os.environ.get("UBIDOTS_TOKEN")
 ser = serial.Serial('/dev/ttyUSB0', 9600,timeout=1)
@@ -42,7 +43,7 @@ def post_request(payload):
 while True:
     if Counter == 10:
         Counter = 0
-        payload = ser.readline().decode('utf-8').rstrip()
+        payload = json.loads('ser.readline().decode('utf-8').rstrip()')
         print(payload)
         post_request(payload)
 
