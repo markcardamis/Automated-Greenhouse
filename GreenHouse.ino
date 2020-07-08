@@ -131,7 +131,12 @@ void loop ()
   }
 
   // ************************************************ ******** Interpretation of the order
-    if (query == "PUMP")
+    if (query == "GET")
+    {
+      readSensors();
+      query = "";
+    }
+    else if (query == "PUMP")
     {
       Serial.println (pumpState);
       query = "";
@@ -212,11 +217,6 @@ void loop ()
     else if (query == "WINRD")
     {
       Serial.println (servomotor.read()); 
-      query = "";
-    }
-    else if (query == "GETALL")
-    {
-      readSensors();
       query = "";
     }
     else
