@@ -316,10 +316,10 @@ void pollSensors(bool debugPrintMode)
 
 void readSensors()
 {
-  jsonDoc["fan"] = fanState;
+  jsonDoc["fan"] = (int)fanState;
   jsonDoc["humidity_external"] = humidity_ext;
   jsonDoc["humidity_internal"] = humidity_int;
-  jsonDoc["lamp"] = lampState;
+  jsonDoc["lamp"] = (int)lampState;
   jsonDoc["luminosity"] = luminosity;
   jsonDoc["moisture"] = soil_moisture;
   jsonDoc["servo"] = servoState;
