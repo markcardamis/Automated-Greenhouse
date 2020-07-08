@@ -333,7 +333,6 @@ void pollSensors(bool debugPrintMode)
 
 void readSensors()
 {
-<<<<<<< HEAD
   jsonDoc[fan_label] = fanState;
   jsonDoc[humidity_external_label] = humidity_ext;
   jsonDoc[humidity_internal_label] = humidity_int;
@@ -343,16 +342,6 @@ void readSensors()
   jsonDoc[servo_label] = servoState;
   jsonDoc[temperature_external_label] = temp_ext;
   jsonDoc[temperature_internal_label] = temp_int;
-=======
-  jsonDoc["humidity_external"] = humidity_ext;
-  jsonDoc["humidity_internal"] = humidity_int;
-  jsonDoc["lamp"] = (int)lampState;
-  jsonDoc["luminosity"] = luminosity;
-  jsonDoc["moisture"] = soil_moisture;
-  jsonDoc["servo"] = servoState;
-  jsonDoc["temperature_external"] = temp_ext;
-  jsonDoc["temperature_internal"] = temp_int;
->>>>>>> bfcf5a045f0c454e81488e8ffb2fe8cec51a93ab
   serializeJson(jsonDoc, Serial); // Write the JSON object straight to the Serial port
 }
 
