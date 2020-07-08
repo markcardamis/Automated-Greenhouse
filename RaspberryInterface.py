@@ -9,7 +9,7 @@ import json     #Library for creating JSON object
 
 TOKEN = os.environ.get("UBIDOTS_TOKEN")
 ser = serial.Serial('/dev/ttyUSB0', 9600,timeout=1)
-ser.flushInput()
+ser.reset_input_buffer()
 
 time.sleep(4)   #Wait for the arduino to be ready
 
@@ -40,14 +40,12 @@ def post_request(payload):
 
 
 while True:
-    if Counter == 10:
-        Counter = 0
-        ser.write(b'GETALL')
-        ser.flush()
-        time.sleep(1)
-        payload = ser.readline().decode('utf-8').rstrip()
-        print(payload)
+    ser.reset_input_buffer()
+    ser.write(b'GET')
+    ser.flush()
+    time.sleep(10)
+    payload = ser.readline().decode('utf-8').rstrip()
+    print(payload)
+    if payload:
         post_request(json.loads(payload))
 
-    Counter = Counter +1
-    time.sleep(1)
