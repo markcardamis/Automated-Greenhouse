@@ -40,9 +40,17 @@ const int pumpTimeThreshold = 2000;             // time (ms) water pump is activ
 const int kSensorPolling = 10000;               // Time (ms) between sensor polls
 const uint32_t kSensorSlowPolling = 600000;     // Time (ms) between slow sensor polls
 const uint32_t kSensorDailyPolling = 86400000;  // Time (ms) between daily sensor polls
-const size_t kJsonSize = JSON_OBJECT_SIZE(9);   // Set number of tracked sensors for JSON model
-      
 
+const size_t kJsonSize = JSON_OBJECT_SIZE(9);   // Set number of tracked sensors for JSON model
+const char fan_label[] = "fan";          // UbiDots variable label names 
+static const char humidity_external_label[] = "humidity_external";
+static const char humidity_internal_label[] = "humidity_internal";
+static const char lamp_label[] = "lamp";
+static const char luminosity_label[] = "luminosity";
+static const char moisture_label[] = "moisture";
+static const char servo_label[] = "servo";
+static const char temperature_external_label[] = "temperature_external";
+static const char temperature_internal_label[] = "temperature_internal";
 
 // Global objects
 Servo servomotor;                       // create servo object to control a servo
@@ -143,47 +151,56 @@ void loop ()
     }
     else if (query == "FAN")
     {
-      Serial.println (fanState);
+      jsonDoc[fan_label] = fanState;
+      serializeJson(jsonDoc, Serial);
       query = "";
     }
     else if (query == "LAMP")
     {
-      Serial.println (lampState);
+      jsonDoc[lamp_label] = lampState;
+      serializeJson(jsonDoc, Serial);
       query = "";
     }
     else if (query == "SERVO")
     {
-      Serial.println (servoState);
+      jsonDoc[servo_label] = servoState;
+      serializeJson(jsonDoc, Serial);
       query = "";
     }
     else if (query == "TPINT")
     {
-      Serial.println (temp_int);
+      jsonDoc[temperature_internal_label] = temp_int;
+      serializeJson(jsonDoc, Serial);
       query = "";
     }
     else if (query == "TPEXT")
     {
-      Serial.println (temp_ext);
+      jsonDoc[temperature_external_label] = temp_ext;
+      serializeJson(jsonDoc, Serial);
       query = "";
     }
     else if (query == "HMINT")
     {
-      Serial.println (humidity_int);
+      jsonDoc[humidity_internal_label] = humidity_int;
+      serializeJson(jsonDoc, Serial);
       query = "";
     }
     else if (query == "HMEXT")
     {
-      Serial.println (humidity_ext);
+      jsonDoc[humidity_external_label] = humidity_ext;
+      serializeJson(jsonDoc, Serial);
       query = "";
     }
     else if (query == "MOIST")
     {
-      Serial.println (soil_moisture);
+      jsonDoc[moisture_label] = soil_moisture;
+      serializeJson(jsonDoc, Serial);
       query = "";
     }
     else if (query == "LUMIN")
     {
-      Serial.println (luminosity);
+      jsonDoc[luminosity_label] = luminosity;
+      serializeJson(jsonDoc, Serial);
       query = "";
     }
     else if (query == "RESET")
@@ -316,15 +333,15 @@ void pollSensors(bool debugPrintMode)
 
 void readSensors()
 {
-  jsonDoc["fan"] = fanState;
-  jsonDoc["humidity_external"] = humidity_ext;
-  jsonDoc["humidity_internal"] = humidity_int;
-  jsonDoc["lamp"] = lampState;
-  jsonDoc["luminosity"] = luminosity;
-  jsonDoc["moisture"] = soil_moisture;
-  jsonDoc["servo"] = servoState;
-  jsonDoc["temperature_external"] = temp_ext;
-  jsonDoc["temperature_internal"] = temp_int;
+  jsonDoc[fan_label] = fanState;
+  jsonDoc[humidity_external_label] = humidity_ext;
+  jsonDoc[humidity_internal_label] = humidity_int;
+  jsonDoc[lamp_label] = lampState;
+  jsonDoc[luminosity_label] = luminosity;
+  jsonDoc[moisture_label] = soil_moisture;
+  jsonDoc[servo_label] = servoState;
+  jsonDoc[temperature_external_label] = temp_ext;
+  jsonDoc[temperature_internal_label] = temp_int;
   serializeJson(jsonDoc, Serial); // Write the JSON object straight to the Serial port
 }
 
