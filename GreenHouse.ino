@@ -151,13 +151,13 @@ void loop ()
     }
     else if (query == "FAN")
     {
-      jsonDoc[fan_label] = fanState;
+      jsonDoc[fan_label] = (int)fanState;
       serializeJson(jsonDoc, Serial);
       query = "";
     }
     else if (query == "LAMP")
     {
-      jsonDoc[lamp_label] = lampState;
+      jsonDoc[lamp_label] = (int)lampState;
       serializeJson(jsonDoc, Serial);
       query = "";
     }
@@ -333,10 +333,10 @@ void pollSensors(bool debugPrintMode)
 
 void readSensors()
 {
-  jsonDoc[fan_label] = fanState;
+  jsonDoc[fan_label] = (int)fanState;
   jsonDoc[humidity_external_label] = humidity_ext;
   jsonDoc[humidity_internal_label] = humidity_int;
-  jsonDoc[lamp_label] = lampState;
+  jsonDoc[lamp_label] = (int)lampState;
   jsonDoc[luminosity_label] = luminosity;
   jsonDoc[moisture_label] = soil_moisture;
   jsonDoc[servo_label] = servoState;
