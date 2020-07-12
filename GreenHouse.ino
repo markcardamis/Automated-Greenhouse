@@ -321,12 +321,16 @@ void pollSensors(bool debugPrintMode)
     
     if (debugPrintMode)
     {
+      Serial.print("temperature_internal_digital:");
       Serial.print(temp_int);
       Serial.print(" ");
+      Serial.print("temperature_internal_analog:");
       Serial.print(Thermister(analogRead(TEMPINTPIN))); // Added Analog Temp Internal to compare calibration between digital sensor
       Serial.print(" ");
+      Serial.print("temperature_external_analog:");
       Serial.print(temp_ext);
       Serial.print(" ");
+      Serial.print("lamp_setpoint:");
       Serial.println((temperature_setpoint-temperature_delta) + (lampState*temperature_delta));
     }
     sensorTimer.startOver();
