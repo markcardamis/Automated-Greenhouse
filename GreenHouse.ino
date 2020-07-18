@@ -20,6 +20,8 @@
 // Function declarations
 void readSensors();       // Poll sensors and print to Serial port
 void pollSensors(bool);   // Read sensors with option to push data to Serial Plotter
+void writeSensorData(const char&, const int&, Stream&);
+void writeSensorData(const char&, const float&, Stream&);
 void command (int, bool);
 void pwm_command (int, bool);
 double Thermister(int);
@@ -41,8 +43,7 @@ const int kSensorPolling = 10000;               // Time (ms) between sensor poll
 const uint32_t kSensorSlowPolling = 600000;     // Time (ms) between slow sensor polls
 const uint32_t kSensorDailyPolling = 86400000;  // Time (ms) between daily sensor polls
 
-const size_t kJsonSize = JSON_OBJECT_SIZE(9);   // Set number of tracked sensors for JSON model
-const char fan_label[] = "fan";          // UbiDots variable label names 
+static const char fan_label[] = "fan";          // UbiDots variable label names 
 static const char humidity_external_label[] = "humidity_external";
 static const char humidity_internal_label[] = "humidity_internal";
 static const char lamp_label[] = "lamp";
@@ -51,6 +52,7 @@ static const char moisture_label[] = "moisture";
 static const char servo_label[] = "servo";
 static const char temperature_external_label[] = "temperature_external";
 static const char temperature_internal_label[] = "temperature_internal";
+static const char pump_label[] = "pump";
 
 // Global objects
 Servo servomotor;                       // create servo object to control a servo
@@ -59,7 +61,6 @@ DHT dhtExterior(DHTEXTPIN, DHT11);      // Create an Exterior DHT sensor object
 SandTimer sensorTimer;                  // Create a general Timer to limit sensor polling
 SandTimer soilMoistureTimer;            // Create a slow-polling Timer for the soil sensor
 SandTimer pumpTimer;                    // Create a daily Timer for the pump solenoid
-DynamicJsonDocument jsonDoc(kJsonSize); // Create a JSON object to send sensor data
 
 // Initialize variables
 bool debugMode = false;
@@ -146,61 +147,58 @@ void loop ()
     }
     else if (query == "PUMP")
     {
-      Serial.println (pumpState);
+      writeSensorData(pump_label, (int)pumpState, Serial);
+      query = "";
+    }
+    else if (query == "SETPUMP")
+    {
+      pumpState = true;
+      writeSensorData(pump_label, (int)pumpState, Serial);
       query = "";
     }
     else if (query == "FAN")
     {
-      jsonDoc[fan_label] = (int)fanState;
-      serializeJson(jsonDoc, Serial);
+      writeSensorData(fan_label, (int)fanState, Serial);
       query = "";
     }
     else if (query == "LAMP")
     {
-      jsonDoc[lamp_label] = (int)lampState;
-      serializeJson(jsonDoc, Serial);
+      writeSensorData(lamp_label, (int)lampState, Serial);
       query = "";
     }
     else if (query == "SERVO")
     {
-      jsonDoc[servo_label] = servoState;
-      serializeJson(jsonDoc, Serial);
+      writeSensorData(servo_label, servoState, Serial);
       query = "";
     }
     else if (query == "TPINT")
     {
-      jsonDoc[temperature_internal_label] = temp_int;
-      serializeJson(jsonDoc, Serial);
+      writeSensorData(temperature_internal_label, temp_int, Serial);
       query = "";
     }
     else if (query == "TPEXT")
     {
-      jsonDoc[temperature_external_label] = temp_ext;
-      serializeJson(jsonDoc, Serial);
+      writeSensorData(temperature_external_label, temp_ext, Serial);
       query = "";
     }
     else if (query == "HMINT")
     {
-      jsonDoc[humidity_internal_label] = humidity_int;
-      serializeJson(jsonDoc, Serial);
+      writeSensorData(humidity_internal_label, humidity_int, Serial);
       query = "";
     }
     else if (query == "HMEXT")
     {
-      jsonDoc[humidity_external_label] = humidity_ext;
-      serializeJson(jsonDoc, Serial);
+      writeSensorData(humidity_external_label, humidity_ext, Serial);
       query = "";
     }
     else if (query == "MOIST")
     {
-      jsonDoc[moisture_label] = soil_moisture;
-      serializeJson(jsonDoc, Serial);
+      writeSensorData(moisture_label, soil_moisture, Serial);
       query = "";
     }
     else if (query == "LUMIN")
     {
-      jsonDoc[luminosity_label] = luminosity;
-      serializeJson(jsonDoc, Serial);
+      writeSensorData(luminosity_label, luminosity, Serial);
       query = "";
     }
     else if (query == "RESET")
@@ -339,16 +337,35 @@ void pollSensors(bool debugPrintMode)
 
 void readSensors()
 {
-  jsonDoc[fan_label] = (int)fanState;
-  jsonDoc[humidity_external_label] = humidity_ext;
-  jsonDoc[humidity_internal_label] = humidity_int;
-  jsonDoc[lamp_label] = (int)lampState;
-  jsonDoc[luminosity_label] = luminosity;
-  jsonDoc[moisture_label] = soil_moisture;
-  jsonDoc[servo_label] = servoState;
-  jsonDoc[temperature_external_label] = temp_ext;
-  jsonDoc[temperature_internal_label] = temp_int;
-  serializeJson(jsonDoc, Serial); // Write the JSON object straight to the Serial port
+  writeSensorData(fan_label, (int)fanState, Serial);
+  writeSensorData(humidity_external_label, humidity_ext, Serial);
+  writeSensorData(humidity_internal_label, humidity_int, Serial);
+  writeSensorData(lamp_label, (int)lampState, Serial);
+  writeSensorData(luminosity_label, luminosity, Serial);
+  writeSensorData(moisture_label, soil_moisture, Serial);
+  writeSensorData(servo_label, servoState, Serial);
+  writeSensorData(temperature_external_label, temp_ext, Serial);
+  writeSensorData(temperature_internal_label, temp_int, Serial);
+}
+
+void writeSensorData(const char* key, const int& value, Stream& output)
+{
+  const size_t capacity = JSON_OBJECT_SIZE(1);
+  StaticJsonDocument<capacity> doc;
+
+  doc[key] = value;
+  
+  serializeJson(doc, output);
+}
+
+void writeSensorData(const char* key, const float& value, Stream& output)
+{
+  const size_t capacity = JSON_OBJECT_SIZE(1);
+  StaticJsonDocument<capacity> doc;
+
+  doc[key] = value;
+  
+  serializeJson(doc, output);
 }
 
 // **************************** function of the output control
@@ -363,6 +380,8 @@ void command (int pin, bool resultcmd)
     digitalWrite (pin, HIGH);
   }
 }
+
+
 
 void pwm_command (int pin, bool resultcmd)
 {
@@ -451,6 +470,7 @@ void pump (bool resultcmd)
 {
   if ((resultcmd == true) || (pumpTimer.finished())) // opening request
   { 
+      pumpState = false;
       command(PUMPPIN, HIGH);
       delay(pumpTimeThreshold);
       command(PUMPPIN, LOW);
