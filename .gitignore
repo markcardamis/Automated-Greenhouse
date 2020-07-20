@@ -52,6 +52,9 @@ Mkfile.old
 dkms.conf
 
 .env
+project_env.py
+project_env.pyc
+log.txt
 
 # OS generated files #
 ######################
@@ -63,3 +66,4 @@ dkms.conf
 ehthumbs.db
 Thumbs.db
 build/
+

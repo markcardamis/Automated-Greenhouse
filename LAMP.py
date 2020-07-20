@@ -8,9 +8,10 @@ import time     #Library for the delay
 import requests #Library for HTTP requests
 import json     #Library for creating JSON object
 import fcntl    #Library for resource locking
+from project_env import UBIDOTS_TOKEN #Library to get env variables
 
 FILENAME = os.path.splitext(os.path.basename(__file__))[0]
-TOKEN = os.environ.get("UBIDOTS_TOKEN")
+TOKEN = (UBIDOTS_TOKEN)
 PORT = '/dev/ttyUSB0'
 BAUDRATE = 9600
 SERIAL_TIMEOUT = 3           #How long to wait(s) before receiving data back
