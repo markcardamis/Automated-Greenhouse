@@ -38,9 +38,10 @@ const int kServomotorResolution = 1;            // Angle (degrees) to increment 
 const int kServomotorDelay = 10;                // time (ms) to wait for servo to reach position
 const uint32_t kFanLowSpeed = 50;               // Duty cycle of fan at low speed
 const uint32_t kFanHighSpeed = 200;             // Duty cycle of fan at high speed
-const int pumpTimeThreshold = 3000;             // time (ms) water pump is activated
+const int pumpTimeThreshold = 4000;             // time (ms) water pump is activated
 const int kSensorPolling = 10000;               // Time (ms) between sensor polls
 const uint32_t kSensorSlowPolling = 600000;     // Time (ms) between slow sensor polls
+const uint32_t kSensor12HourPolling = 43200000; // Time (ms) between daily sensor polls
 const uint32_t kSensorDailyPolling = 86400000;  // Time (ms) between daily sensor polls
 
 static const char fan_label[] = "fan";          // UbiDots variable label names 
@@ -103,7 +104,7 @@ void setup ()
 
   sensorTimer.start(kSensorPolling);           // Poll general input sensors every 10 seconds
   soilMoistureTimer.start(kSensorSlowPolling); // Poll soil Moisture sensor every 10 min
-  pumpTimer.start(kSensorDailyPolling);        // Poll the pump solenoid state every 24 hours
+  pumpTimer.start(kSensor12HourPolling);       // Poll the pump solenoid state every 24 hours
   
   // Initialize the digital inputs/outputs
   pinMode(SOILPINVCC, OUTPUT);    // Pin to control the Soil Moisture VCC
