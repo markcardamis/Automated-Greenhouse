@@ -9,6 +9,7 @@ import requests #Library for HTTP requests
 import json     #Library for creating JSON object
 import fcntl    #Library for resource locking
 from project_env import UBIDOTS_TOKEN #Library to get env variables
+import termios
 
 FILENAME = os.path.splitext(os.path.basename(__file__))[0]
 TOKEN = (UBIDOTS_TOKEN)
@@ -19,6 +20,13 @@ SERIAL_RETRY_INTERVAL = 5    #How long to wait(s) before retrying serial connect
 MAX_SERIAL_RETRY = 10        #Maximum number of retries for serial connection
 HTTP_RETRY_INTERVAL = 1      #How long to wait(s) before retrying HTTP connection
 MAX_HTTP_RETRY = 5           #Maximum number of retries for HTTP connection
+
+#Fix issue with Arduino resetting every command sent
+f = open(PORT)
+attrs = termios.tcgetattr(f)
+attrs[2] = attrs[2] & ~termios.HUPCL
+termios.tcsetattr(f, termios.TCSAFLUSH, attrs)
+f.close()
 
 ser = serial.Serial()
 ser.baudrate = BAUDRATE
